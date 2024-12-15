@@ -1,9 +1,12 @@
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
+const cors = require('cors');  // Importa el paquete cors
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.use(cors());  // Permitir solicitudes desde otros dominios
 
 // Middleware para procesar JSON
 app.use(express.json());
