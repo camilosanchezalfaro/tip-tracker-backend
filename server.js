@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());  // Para manejar JSON en el cuerpo de las solicitudes
 
 // Conexión con MongoDB Atlas
-mongoose.connect('mongodb+srv://<usuario>:<contraseña>@cluster0.mongodb.net/tiptracker', {
+mongoose.connect('mongodb+srv://<sanchezalfarocamilo@gmail.com>:<123mongo123>@cluster0.mongodb.net/tiptracker', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
