@@ -1,13 +1,13 @@
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
-const cors = require('cors');
+const cors = require('cors'); // Agrega esta línea para importar cors
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware para permitir solicitudes CORS
-app.use(cors());
+// Habilitar CORS para todas las solicitudes
+app.use(cors());  // Esta línea es la clave para permitir CORS
 
 // Middleware para procesar JSON
 app.use(express.json());
