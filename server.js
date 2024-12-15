@@ -13,7 +13,8 @@ app.use(cors());
 app.use(express.json());
 
 // Utilizar variables de entorno para la URL de la base de datos
-mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://sanchezalfarocamilo:<123mongodb123>@cluster0.aufme.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+
 
 // Función para escanear una web y obtener pronósticos
 async function scanWebsite(config) {
