@@ -7,7 +7,8 @@ const WebConfig = require('./models/WebConfig'); // Suponiendo que tienes un mod
 const app = express();
 app.use(express.json());
 
-mongoose.connect('mongodb://localhost:27017/pronosticos', { useNewUrlParser: true, useUnifiedTopology: true });
+// Utilizar variables de entorno para la URL de la base de datos
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/pronosticos', { useNewUrlParser: true, useUnifiedTopology: true });
 
 // Función para escanear una web y obtener pronósticos
 async function scanWebsite(config) {
@@ -40,8 +41,8 @@ async function scanWebsite(config) {
   }
 }
 
-// Endpoint para escanear una web
-app.post('/scan-website', async (req, res) => {
+// Endpoint para escanear una web (cambiar la ruta para coincidir con el frontend)
+app.post('/api/scan', async (req, res) => {
   const { webId } = req.body;
   try {
     const config = await WebConfig.findById(webId);
@@ -52,6 +53,19 @@ app.post('/scan-website', async (req, res) => {
     res.json(pronosticos);
   } catch (error) {
     res.status(500).json({ error: 'Error al escanear la web' });
+  }
+});
+
+// Ruta de prueba para agregar configuraciones
+app.post('/api/add-web-config', async (req, res) => {
+  const { url, selectorPronosticos, selectorFecha, selectorTitulos, palabrasClave } = req.body;
+  try {
+    const newConfig = new WebConfig({ url, selectorPronosticos, selectorFecha, selectorTitulos, palabrasClave });
+    await newConfig.save();
+    res.json({ success: true, message: 'Configuración guardada exitosamente' });
+  } catch (error) {
+    console.error('Error al guardar la configuración:', error);
+    res.status(500).json({ error: 'Error al guardar la configuración' });
   }
 });
 
