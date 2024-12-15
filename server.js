@@ -1,25 +1,36 @@
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
-const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+app.use(express.json());  // Para manejar JSON en el cuerpo de las solicitudes
 
-// Habilitar CORS para todas las solicitudes desde tu frontend en Vercel
-app.use(cors({
-    origin: 'https://tip-tracker-frontend.vercel.app',  // Permite solicitudes solo desde el frontend
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type']
-}));
-app.use(express.json());
+// Ruta para agregar palabras clave al diccionario
+app.post('/api/add-dictionary', (req, res) => {
+    const { titles, date_formats, tip_keywords } = req.body;
 
-// Ruta para escanear la web
+    if (!titles || !date_formats || !tip_keywords) {
+        return res.status(400).json({ success: false, message: 'Faltan datos en el diccionario.' });
+    }
+
+    // Aquí se agregarían los datos al diccionario, que se guarda en memoria o base de datos.
+    // Esto es solo un ejemplo, debes asegurarte de guardarlos en tu almacenamiento real.
+    // Aquí guardamos los valores temporalmente en una variable global como ejemplo.
+    global.dictionary = {
+        titles,
+        date_formats,
+        tip_keywords
+    };
+
+    return res.json({ success: true, message: 'Diccionario actualizado correctamente.' });
+});
+
+// Ruta para escanear la URL
 app.post('/api/scan', async (req, res) => {
-    const { url } = req.body;
+    const { url, keywords } = req.body;
 
-    if (!url) {
-        return res.status(400).json({ success: false, message: 'URL no proporcionada.' });
+    if (!url || !keywords) {
+        return res.status(400).json({ success: false, message: 'URL o palabras clave no proporcionadas.' });
     }
 
     try {
@@ -29,49 +40,81 @@ app.post('/api/scan', async (req, res) => {
 
         let foundTips = [];
 
-        // Ajuste del selector para extraer solo los pronósticos específicos
-        $('p').each((_, element) => {
-            const text = $(element).text().trim();
-
-            // Verificar si el texto coincide con el formato de pronóstico
-            if (text.match(/MATCH:.*PICK:.*ODD:/)) {
-                foundTips.push(text);
+        // Buscar Título
+        let foundTitle = false;
+        for (let title of keywords.titles) {
+            if (html.includes(title)) {
+                foundTitle = true;
+                break;
             }
-        });
+        }
+
+        // Si se encuentra el título, buscar la fecha
+        if (foundTitle) {
+            let foundDate = false;
+            const dateFormats = keywords.date_formats;
+
+            // Verificar si la fecha en la página coincide con los formatos ingresados
+            $('body').text().split(' ').forEach(word => {
+                for (let dateFormat of dateFormats) {
+                    if (matchDateFormat(word, dateFormat)) {
+                        foundDate = true;
+                        break;
+                    }
+                }
+            });
+
+            // Si se encuentra la fecha, buscar los tips de pronóstico
+            if (foundDate) {
+                $('p').each((_, element) => {
+                    const text = $(element).text().trim();
+                    for (let tipKeyword of keywords.tip_keywords) {
+                        if (text.toUpperCase().includes(tipKeyword)) {
+                            foundTips.push(text);
+                            break;
+                        }
+                    }
+                });
+            }
+        }
 
         if (foundTips.length > 0) {
             return res.json({ success: true, tips: foundTips });
         } else {
             return res.json({ success: false, message: 'No se encontraron tips con esas palabras clave.' });
         }
-
     } catch (error) {
         console.error('Error al analizar la URL:', error);
         res.status(500).json({ success: false, message: 'Error al procesar la URL.' });
     }
 });
 
-// Ruta para agregar al diccionario
-app.post('/api/add-dictionary', async (req, res) => {
-    const { title, dateFormat, tipFormat } = req.body;
+// Función para comparar fechas con los formatos ingresados
+function matchDateFormat(dateString, format) {
+    const dateParts = dateString.split(/[^0-9a-zA-Z]+/); // Dividir por cualquier no alfanumérico
+    const formatParts = format.split(' '); // Esperamos que el formato esté separado por espacios
 
-    if (!title || !dateFormat || !tipFormat) {
-        return res.status(400).json({ success: false, message: 'Datos incompletos para agregar al diccionario.' });
+    // Compara las partes de la fecha con el formato
+    if (dateParts.length !== formatParts.length) return false;
+
+    for (let i = 0; i < dateParts.length; i++) {
+        if (formatParts[i] === 'dd' && !/^\d{2}$/.test(dateParts[i])) return false;
+        if (formatParts[i] === 'mm' && !/^\d{2}$/.test(dateParts[i])) return false;
+        if (formatParts[i] === 'aaaa' && !/^\d{4}$/.test(dateParts[i])) return false;
     }
 
-    try {
-        // Aquí puedes guardar los datos en una base de datos o archivo (por ahora solo mostraría la información)
-        // Dependiendo de cómo lo quieras almacenar
-        console.log('Datos para agregar al diccionario:', { title, dateFormat, tipFormat });
-        return res.json({ success: true, message: 'Datos agregados correctamente al diccionario.' });
+    return true;
+}
 
-    } catch (error) {
-        console.error('Error al agregar al diccionario:', error);
-        res.status(500).json({ success: false, message: 'Error al agregar al diccionario.' });
-    }
-});
+// Inicializa el diccionario globalmente (esto es solo para demostración, deberías usar una base de datos o almacenamiento adecuado)
+global.dictionary = {
+    titles: ['FREE FOOTBALL PREDICTIONS', 'DAILY PREDICTIONS', 'DAILY FOOTBALL TIPS'],  // Ejemplo de títulos
+    date_formats: ['dd mm aaaa', 'dd.mm.aaaa'],  // Ejemplo de formatos de fecha
+    tip_keywords: ['PICK', 'ODD', 'TIP', 'MATCH']  // Ejemplo de palabras clave para pronósticos
+};
 
-// Iniciar el servidor
+// Configuración del puerto
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
