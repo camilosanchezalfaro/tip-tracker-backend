@@ -9,12 +9,12 @@ const app = express();
 
 // Habilita CORS globalmente para todas las rutas
 app.use(cors());
-
 app.use(express.json());
 
 // Utilizar variables de entorno para la URL de la base de datos
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Conexión a MongoDB exitosa'))
+  .catch((err) => console.error('Error al conectar a MongoDB:', err));
 
 // Función para escanear una web y obtener pronósticos
 async function scanWebsite(config) {
@@ -75,6 +75,7 @@ app.post('/api/add-web-config', async (req, res) => {
   }
 });
 
+// Servidor escucha en el puerto 3000
 app.listen(3000, () => {
   console.log('Servidor escuchando en el puerto 3000');
 });
