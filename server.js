@@ -50,4 +50,30 @@ async function scanWebsite(config) {
 app.post('/api/scan', async (req, res) => {
   const { webId } = req.body;
   try {
-    const config = await WebCon
+    const config = await WebConfig.findById(webId);
+    if (!config) {
+      return res.status(404).json({ error: 'Web configuration not found' });
+    }
+    const pronosticos = await scanWebsite(config);
+    res.json(pronosticos);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al escanear la web' });
+  }
+});
+
+// Ruta de prueba para agregar configuraciones
+app.post('/api/add-web-config', async (req, res) => {
+  const { url, selectorPronosticos, selectorFecha, selectorTitulos, palabrasClave } = req.body;
+  try {
+    const newConfig = new WebConfig({ url, selectorPronosticos, selectorFecha, selectorTitulos, palabrasClave });
+    await newConfig.save();
+    res.json({ success: true, message: 'Configuración guardada exitosamente' });
+  } catch (error) {
+    console.error('Error al guardar la configuración:', error);
+    res.status(500).json({ error: 'Error al guardar la configuración' });
+  }
+});
+
+app.listen(3000, () => {
+  console.log('Servidor escuchando en el puerto 3000');
+});
