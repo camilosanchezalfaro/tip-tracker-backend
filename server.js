@@ -1,57 +1,60 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const axios = require('axios');
 const cheerio = require('cheerio');
+const mongoose = require('mongoose');
+const WebConfig = require('./models/WebConfig'); // Suponiendo que tienes un modelo WebConfig
 
 const app = express();
-app.use(express.json());  // Para manejar JSON en el cuerpo de las solicitudes
+app.use(express.json());
 
-// Conexión con MongoDB Atlas
-mongoose.connect('mongodb+srv://<sanchezalfarocamilo@gmail.com>:<123mongo123>@cluster0.mongodb.net/tiptracker', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-  .then(() => console.log('Conectado a la base de datos de MongoDB'))
-  .catch((error) => console.error('Error de conexión a MongoDB:', error));
+mongoose.connect('mongodb://localhost:27017/pronosticos', { useNewUrlParser: true, useUnifiedTopology: true });
 
-// Definir esquema de configuración para las webs
-const webConfigSchema = new mongoose.Schema({
-  url: String,
-  titles: [String],
-  dateFormats: [String],
-  tipKeywords: [String],
-  cssSelectors: {
-    tip: String,
-    date: String,
-    title: String
-  }
-});
-
-const WebConfig = mongoose.model('WebConfig', webConfigSchema);
-
-// Ruta para agregar configuración de página web
-app.post('/api/configure-web', async (req, res) => {
-  const { url, titles, dateFormats, tipKeywords, cssSelectors } = req.body;
-
+// Función para escanear una web y obtener pronósticos
+async function scanWebsite(config) {
   try {
-    const newConfig = new WebConfig({
-      url,
-      titles,
-      dateFormats,
-      tipKeywords,
-      cssSelectors
+    const response = await axios.get(config.url);
+    const $ = cheerio.load(response.data);
+
+    // Buscamos los pronósticos con los selectores CSS configurados
+    const pronosticos = [];
+    $(config.selectorPronosticos).each((i, el) => {
+      const pronostico = $(el).text();
+      const fecha = $(config.selectorFecha).text();
+      const titulo = $(config.selectorTitulos).text();
+
+      // Filtrar los pronósticos según las palabras clave
+      if (config.palabrasClave.some(palabra => pronostico.includes(palabra))) {
+        pronosticos.push({
+          pronostico,
+          fecha,
+          titulo,
+        });
+      }
     });
 
-    await newConfig.save();
-    res.json({ success: true, message: 'Configuración guardada correctamente' });
+    return pronosticos;
+
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error al guardar la configuración' });
+    console.error("Error al escanear la web:", error);
+    return [];
+  }
+}
+
+// Endpoint para escanear una web
+app.post('/scan-website', async (req, res) => {
+  const { webId } = req.body;
+  try {
+    const config = await WebConfig.findById(webId);
+    if (!config) {
+      return res.status(404).json({ error: 'Web configuration not found' });
+    }
+    const pronosticos = await scanWebsite(config);
+    res.json(pronosticos);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al escanear la web' });
   }
 });
 
-// Resto de las rutas y lógica para escanear las webs, como el ejemplo anterior
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
+app.listen(3000, () => {
+  console.log('Servidor escuchando en el puerto 3000');
 });
