@@ -25,14 +25,14 @@ app.post('/api/scan', async (req, res) => {
 
         let foundTips = [];
 
-        // Buscar los tips utilizando las palabras clave
-        $('*').each((_, element) => {
+        // Ajuste del selector para extraer solo los pronósticos específicos
+        $('p').each((_, element) => {
             const text = $(element).text().trim();
-            keywords.forEach(keyword => {
-                if (text.includes(keyword)) {
-                    foundTips.push(text);
-                }
-            });
+
+            // Verificar si el texto coincide con el formato de pronóstico
+            if (text.match(/MATCH:.*PICK:.*ODD:/)) {
+                foundTips.push(text);
+            }
         });
 
         if (foundTips.length > 0) {
