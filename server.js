@@ -1,15 +1,16 @@
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
-const cors = require('cors'); // Importamos cors
+const cors = require('cors'); // Asegúrate de que esto está importado
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configurar CORS para permitir solicitudes de cualquier origen
+// Configuración detallada de CORS
 app.use(cors({
-    origin: '*', // Cambié esto para permitir cualquier origen
-    methods: ['GET', 'POST'], // Métodos permitidos
+    origin: ['https://tip-tracker-frontend.vercel.app'], // Reemplaza con tu dominio frontend específico
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
 }));
 
 // Middleware para procesar JSON
