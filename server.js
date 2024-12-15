@@ -1,35 +1,31 @@
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
-const cors = require('cors'); // Agrega esta línea para importar cors
+const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Habilitar CORS para todas las solicitudes
-app.use(cors());  // Esta línea es la clave para permitir CORS
-
-// Middleware para procesar JSON
+app.use(cors());
 app.use(express.json());
 
 // Ruta para escanear la web
 app.post('/api/scan', async (req, res) => {
-    const { url } = req.body;
+    const { url, keywords } = req.body;
 
-    if (!url) {
-        return res.status(400).json({ success: false, message: 'URL no proporcionada.' });
+    if (!url || !keywords || keywords.length === 0) {
+        return res.status(400).json({ success: false, message: 'URL o palabras clave no proporcionadas.' });
     }
 
     try {
         const response = await axios.get(url);
         const html = response.data;
-
         const $ = cheerio.load(html);
 
-        // Buscar términos clave
-        const keywords = ["FREE FOOTBALL PREDICTIONS TODAY", "FREE TIPS", "DAILY PREDICTIONS"];
         let foundTips = [];
 
+        // Buscar los tips utilizando las palabras clave
         $('*').each((_, element) => {
             const text = $(element).text().trim();
             keywords.forEach(keyword => {
@@ -42,7 +38,7 @@ app.post('/api/scan', async (req, res) => {
         if (foundTips.length > 0) {
             return res.json({ success: true, tips: foundTips });
         } else {
-            return res.json({ success: false, message: 'No se encontraron tips en esta URL.' });
+            return res.json({ success: false, message: 'No se encontraron tips con esas palabras clave.' });
         }
 
     } catch (error) {
