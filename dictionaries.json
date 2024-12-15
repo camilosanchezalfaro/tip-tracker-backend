@@ -1,0 +1,22 @@
+{
+  "titles": [
+    "FREE DAILY PREDICTIONS",
+    "FREE FOOTBALL PREDICTIONS",
+    "FREE SOCCER PREDICTIONS",
+    "DAILY FOOTBALL TIPS",
+    "DAILY SOCCER PREDICTIONS"
+  ],
+  "date_formats": [
+    "\\d{2}-\\d{2}-\\d{2}",
+    "\\d{2}/\\d{2}/\\d{2}",
+    "\\d{2}\\.\\d{2}\\.\\d{2}"
+  ],
+  "tip_keywords": [
+    "PICK",
+    "ODD",
+    "MATCH",
+    "QUOTA",
+    "BET",
+    "TIP"
+  ]
+}
