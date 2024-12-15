@@ -1,10 +1,15 @@
 const express = require('express');
+const cors = require('cors');  // Importa CORS
 const axios = require('axios');
 const cheerio = require('cheerio');
 const mongoose = require('mongoose');
 const WebConfig = require('./models/WebConfig'); // Suponiendo que tienes un modelo WebConfig
 
 const app = express();
+
+// Habilita CORS globalmente para todas las rutas
+app.use(cors());
+
 app.use(express.json());
 
 // Utilizar variables de entorno para la URL de la base de datos
@@ -41,34 +46,8 @@ async function scanWebsite(config) {
   }
 }
 
-// Endpoint para escanear una web (cambiar la ruta para coincidir con el frontend)
+// Endpoint para escanear una web
 app.post('/api/scan', async (req, res) => {
   const { webId } = req.body;
   try {
-    const config = await WebConfig.findById(webId);
-    if (!config) {
-      return res.status(404).json({ error: 'Web configuration not found' });
-    }
-    const pronosticos = await scanWebsite(config);
-    res.json(pronosticos);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al escanear la web' });
-  }
-});
-
-// Ruta de prueba para agregar configuraciones
-app.post('/api/add-web-config', async (req, res) => {
-  const { url, selectorPronosticos, selectorFecha, selectorTitulos, palabrasClave } = req.body;
-  try {
-    const newConfig = new WebConfig({ url, selectorPronosticos, selectorFecha, selectorTitulos, palabrasClave });
-    await newConfig.save();
-    res.json({ success: true, message: 'Configuración guardada exitosamente' });
-  } catch (error) {
-    console.error('Error al guardar la configuración:', error);
-    res.status(500).json({ error: 'Error al guardar la configuración' });
-  }
-});
-
-app.listen(3000, () => {
-  console.log('Servidor escuchando en el puerto 3000');
-});
+    const config = await WebCon
