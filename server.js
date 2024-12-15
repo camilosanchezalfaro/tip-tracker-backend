@@ -1,21 +1,38 @@
-// Diccionarios en memoria (luego podríamos guardar esto en una base de datos)
-let titleDictionary = [];
-let dateFormatDictionary = [];
-let predictionFormatDictionary = [];
+// Asegúrate de tener esto en tu backend (tip-tracker-backend/server.js)
+const express = require('express');
+const axios = require('axios');
+const cheerio = require('cheerio');
+const cors = require('cors');
 
-app.post('/api/add-dictionary', (req, res) => {
-    const { title, dateFormat, predictionFormat } = req.body;
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-    if (!title || !dateFormat || !predictionFormat) {
-        return res.status(400).json({ success: false, message: 'Faltan campos en el diccionario.' });
+// Habilitar CORS para todas las solicitudes
+app.use(cors({
+    origin: 'https://tip-tracker-frontend.vercel.app', // Permitir solo solicitudes de tu frontend
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
+}));
+
+// Ruta para agregar a los diccionarios
+app.post('/api/add-dictionary', async (req, res) => {
+    // Lógica para agregar a los diccionarios
+    try {
+        // Aquí agregas el código para almacenar los datos en los diccionarios
+        // (puedes guardarlos en un archivo, base de datos, etc.)
+        console.log(req.body); // Para verificar que se reciben correctamente los datos
+        res.status(200).json({ success: true });
+    } catch (error) {
+        console.error('Error al agregar al diccionario:', error);
+        res.status(500).json({ success: false, message: 'Error al agregar al diccionario.' });
     }
+});
 
-    // Agregar los valores al diccionario
-    titleDictionary.push(title);
-    dateFormatDictionary.push(dateFormat);
-    predictionFormatDictionary.push(predictionFormat);
+// Ruta para escanear la web
+app.post('/api/scan', async (req, res) => {
+    // Lógica del escaneo aquí...
+});
 
-    console.log('Diccionario actualizado:', { titleDictionary, dateFormatDictionary, predictionFormatDictionary });
-
-    return res.json({ success: true, message: 'Diccionario actualizado con éxito.' });
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
