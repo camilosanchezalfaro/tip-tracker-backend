@@ -23,6 +23,37 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Conexión a MongoDB exitosa'))
   .catch((err) => console.error('Error al conectar a MongoDB:', err));
 
+// Función para escanear una web y obtener pronósticos
+async function scanWebsite(config) {
+  try {
+    const response = await axios.get(config.url);
+    const $ = cheerio.load(response.data);
+
+    // Buscamos los pronósticos con los selectores CSS configurados
+    const pronosticos = [];
+    $(config.selectorPronosticos).each((i, el) => {
+      const pronostico = $(el).text();
+      const fecha = $(config.selectorFecha).text();
+      const titulo = $(config.selectorTitulos).text();
+
+      // Filtrar los pronósticos según las palabras clave
+      if (config.palabrasClave.some(palabra => pronostico.includes(palabra))) {
+        pronosticos.push({
+          pronostico,
+          fecha,
+          titulo,
+        });
+      }
+    });
+
+    return pronosticos;
+
+  } catch (error) {
+    console.error("Error al escanear la web:", error);
+    return [];
+  }
+}
+
 // Usamos las rutas definidas en scan.js
 app.use('/api', scanRoutes);
 
@@ -44,5 +75,4 @@ app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
 });
 
-module.exports = { scanWebsite };
-
+module.exports = { scanWebsite };  // Exporta la función para ser utilizada en scan.js
