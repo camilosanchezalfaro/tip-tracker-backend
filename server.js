@@ -62,6 +62,9 @@ app.use('/api', scanRoutes);
 // Ruta de prueba para agregar configuraciones
 app.post('/api/add-web-config', async (req, res) => {
   const { url, selectorPronosticos, selectorFecha, selectorTitulos, palabrasClave } = req.body;
+  if (!url || !selectorPronosticos || !selectorFecha || !selectorTitulos || !palabrasClave) {
+    return res.status(400).json({ error: 'Todos los campos son requeridos' });
+  }
   try {
     const newConfig = new WebConfig({ url, selectorPronosticos, selectorFecha, selectorTitulos, palabrasClave });
     await newConfig.save();
@@ -71,6 +74,7 @@ app.post('/api/add-web-config', async (req, res) => {
     res.status(500).json({ error: 'Error al guardar la configuración' });
   }
 });
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
