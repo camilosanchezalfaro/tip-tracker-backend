@@ -1,5 +1,5 @@
 const express = require('express');
-const cors = require('cors');  // Importa CORS
+const cors = require('cors');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const mongoose = require('mongoose');
@@ -11,7 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Verifica que MONGODB_URI esté configurada en las variables de entorno
+// Asegúrate de que MONGODB_URI esté configurada en las variables de entorno
 const mongoURI = process.env.MONGODB_URI;
 
 if (!mongoURI) {
@@ -19,7 +19,7 @@ if (!mongoURI) {
   process.exit(1);
 }
 
-// Utilizar variables de entorno para la URL de la base de datos
+// Conectar a MongoDB usando mongoose
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Conexión a MongoDB exitosa'))
   .catch((err) => console.error('Error al conectar a MongoDB:', err));
