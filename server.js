@@ -11,8 +11,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Verifica que MONGODB_URI esté configurada en las variables de entorno
+const mongoURI = process.env.MONGODB_URI;
+
+if (!mongoURI) {
+  console.error('Falta la variable de entorno MONGODB_URI');
+  process.exit(1);
+}
+
 // Utilizar variables de entorno para la URL de la base de datos
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Conexión a MongoDB exitosa'))
   .catch((err) => console.error('Error al conectar a MongoDB:', err));
 
