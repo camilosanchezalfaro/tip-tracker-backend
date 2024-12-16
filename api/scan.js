@@ -6,10 +6,13 @@ const router = express.Router();
 
 router.post('/scan', async (req, res) => {
   const { webId } = req.body;
+  if (!webId) {
+    return res.status(400).json({ error: 'El ID de la web es requerido' });
+  }
   try {
     const config = await WebConfig.findById(webId);
     if (!config) {
-      return res.status(404).json({ error: 'Web configuration not found' });
+      return res.status(404).json({ error: 'Configuración de web no encontrada' });
     }
     const pronosticos = await scanWebsite(config);
     res.json(pronosticos);
@@ -17,5 +20,6 @@ router.post('/scan', async (req, res) => {
     res.status(500).json({ error: 'Error al escanear la web' });
   }
 });
+
 
 module.exports = router;
