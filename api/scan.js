@@ -1,5 +1,5 @@
 const express = require('express');
-const WebConfig = require('../../models/WebConfig');  // Ruta al modelo WebConfig
+const WebConfig = require('../models/WebConfig');  // Ruta al modelo WebConfig
 const { scanWebsite } = require('../../server');  // Asegúrate de exportar la función scanWebsite desde server.js
 
 const router = express.Router();
