@@ -1,9 +1,8 @@
 const express = require('express');
 const cors = require('cors');
-const axios = require('axios');
-const cheerio = require('cheerio');
 const mongoose = require('mongoose');
 const WebConfig = require('./models/WebConfig'); // Suponiendo que tienes un modelo WebConfig
+const scanRoutes = require('./api/scan');  // Importamos las rutas del archivo scan.js
 
 const app = express();
 
@@ -24,51 +23,8 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Conexión a MongoDB exitosa'))
   .catch((err) => console.error('Error al conectar a MongoDB:', err));
 
-// Función para escanear una web y obtener pronósticos
-async function scanWebsite(config) {
-  try {
-    const response = await axios.get(config.url);
-    const $ = cheerio.load(response.data);
-
-    // Buscamos los pronósticos con los selectores CSS configurados
-    const pronosticos = [];
-    $(config.selectorPronosticos).each((i, el) => {
-      const pronostico = $(el).text();
-      const fecha = $(config.selectorFecha).text();
-      const titulo = $(config.selectorTitulos).text();
-
-      // Filtrar los pronósticos según las palabras clave
-      if (config.palabrasClave.some(palabra => pronostico.includes(palabra))) {
-        pronosticos.push({
-          pronostico,
-          fecha,
-          titulo,
-        });
-      }
-    });
-
-    return pronosticos;
-
-  } catch (error) {
-    console.error("Error al escanear la web:", error);
-    return [];
-  }
-}
-
-// Endpoint para escanear una web
-app.post('/api/scan', async (req, res) => {
-  const { webId } = req.body;
-  try {
-    const config = await WebConfig.findById(webId);
-    if (!config) {
-      return res.status(404).json({ error: 'Web configuration not found' });
-    }
-    const pronosticos = await scanWebsite(config);
-    res.json(pronosticos);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al escanear la web' });
-  }
-});
+// Usamos las rutas definidas en scan.js
+app.use('/api', scanRoutes);
 
 // Ruta de prueba para agregar configuraciones
 app.post('/api/add-web-config', async (req, res) => {
@@ -82,8 +38,8 @@ app.post('/api/add-web-config', async (req, res) => {
     res.status(500).json({ error: 'Error al guardar la configuración' });
   }
 });
-const port = process.env.PORT || 3000;  // Usa el puerto proporcionado por Vercel, o el puerto 3000 en caso contrario
+
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
 });
-
