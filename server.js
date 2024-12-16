@@ -82,8 +82,8 @@ app.post('/api/add-web-config', async (req, res) => {
     res.status(500).json({ error: 'Error al guardar la configuración' });
   }
 });
-
-// Servidor escucha en el puerto 3000
-app.listen(3000, () => {
-  console.log('Servidor escuchando en el puerto 3000');
+const port = process.env.PORT || 3000;  // Usa el puerto proporcionado por Vercel, o el puerto 3000 en caso contrario
+app.listen(port, () => {
+  console.log(`Servidor escuchando en el puerto ${port}`);
 });
+
