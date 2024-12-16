@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const axios = require('axios');  // Importa axios
+const cheerio = require('cheerio');  // Importa cheerio
 const WebConfig = require('./models/WebConfig'); // Suponiendo que tienes un modelo WebConfig
 const scanRoutes = require('./api/scan');  // Importamos las rutas del archivo scan.js
 
